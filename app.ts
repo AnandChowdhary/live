@@ -52,12 +52,10 @@ app.get("/", async (req, res) => {
     _min: { value: true },
     _max: { value: true },
   });
-  return res
-    .json({
-      count,
-      ...aggregations,
-    })
-    .header("Cache-Control", "public, max-age=3600");
+  return res.header("Cache-Control", "public, max-age=3600").json({
+    count,
+    ...aggregations,
+  });
 });
 
 app.get("/data", async (req, res) => {
@@ -98,7 +96,7 @@ app.get("/data", async (req, res) => {
       take: 100,
       orderBy: sort ? { [sort.split(":")[0]]: sort.split(":")[1] } : undefined,
     });
-    return res.json(data).header("Cache-Control", "public, max-age=3600");
+    return res.header("Cache-Control", "public, max-age=3600").json(data);
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error });

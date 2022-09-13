@@ -59,13 +59,14 @@ app.get("/", async (req, res) => {
 });
 
 app.get("/data", async (req, res) => {
-  const { before, after, type, value, unit } = z
+  const { before, after, type, value, unit, sort } = z
     .object({
       before: z.date().optional(),
       after: z.date().optional(),
       type: z.string().optional(),
       value: z.number().optional(),
       unit: z.string().optional(),
+      sort: z.string().optional(),
     })
     .parse({
       ...req.query,
@@ -89,8 +90,17 @@ app.get("/data", async (req, res) => {
     value,
     unit,
   } as const;
-  const data = await db.healthkit_record.findMany({ where, take: 100 });
-  return res.json(data);
+  try {
+    const data = await db.healthkit_record.findMany({
+      where,
+      take: 100,
+      orderBy: sort ? { [sort.split(":")[0]]: sort.split(":")[1] } : undefined,
+    });
+    return res.json(data);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error });
+  }
 });
 
 app.post("/", async (req, res) => {

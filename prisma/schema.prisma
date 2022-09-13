@@ -15,4 +15,7 @@ model healthkit_record {
   type      String
   value     Float
   unit      String
+
+  @@index([date])
+  @@index([type])
 }

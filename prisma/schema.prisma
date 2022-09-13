@@ -7,10 +7,12 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model heart_rate {
+model healthkit_record {
   id        Int      @id @default(autoincrement())
   synced_at DateTime @default(now())
   hash      String   @unique
   date      DateTime
-  value     Int
+  type      String
+  value     Float
+  unit      String
 }

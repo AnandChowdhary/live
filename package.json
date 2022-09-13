@@ -25,7 +25,8 @@
     "express": "^4.18.1",
     "got": "^12.4.1",
     "node-html-parser": "^6.0.0",
-    "tiny-async-pool": "^2.1.0"
+    "tiny-async-pool": "^2.1.0",
+    "zod": "^3.19.1"
   },
   "devDependencies": {
     "@swc-node/register": "^1.5.1",

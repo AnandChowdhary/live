@@ -3,12 +3,95 @@ import parser from "body-parser";
 import { createHash } from "crypto";
 import express from "express";
 import asyncPool from "tiny-async-pool";
+import { z } from "zod";
 import { MAX_POOL_SIZE } from "./constants";
 
 const db = new PrismaClient();
 const app = express();
 app.use(parser.json({ limit: "100mb" }));
 const port = process.env.PORT || 3000;
+
+app.get("/", async (req, res) => {
+  const { before, after, type, value, unit } = z
+    .object({
+      before: z.date().optional(),
+      after: z.date().optional(),
+      type: z.string().optional(),
+      value: z.number().optional(),
+      unit: z.string().optional(),
+    })
+    .parse({
+      ...req.query,
+      before:
+        typeof req.query.before === "string"
+          ? new Date(req.query.before)
+          : undefined,
+      after:
+        typeof req.query.after === "string"
+          ? new Date(req.query.after)
+          : undefined,
+      value:
+        typeof req.query.value === "string"
+          ? Number(req.query.value)
+          : undefined,
+    });
+
+  const where = {
+    date: { gte: after, lte: before },
+    type,
+    value,
+    unit,
+  } as const;
+  const count = await db.healthkit_record.count({
+    where,
+  });
+  const aggregations = await db.healthkit_record.aggregate({
+    where,
+    _avg: { value: true },
+    _sum: { value: true },
+    _min: { value: true },
+    _max: { value: true },
+  });
+  return res.json({
+    count,
+    ...aggregations,
+  });
+});
+
+app.get("/data", async (req, res) => {
+  const { before, after, type, value, unit } = z
+    .object({
+      before: z.date().optional(),
+      after: z.date().optional(),
+      type: z.string().optional(),
+      value: z.number().optional(),
+      unit: z.string().optional(),
+    })
+    .parse({
+      ...req.query,
+      before:
+        typeof req.query.before === "string"
+          ? new Date(req.query.before)
+          : undefined,
+      after:
+        typeof req.query.after === "string"
+          ? new Date(req.query.after)
+          : undefined,
+      value:
+        typeof req.query.value === "string"
+          ? Number(req.query.value)
+          : undefined,
+    });
+
+  const where = {
+    date: { gte: after, lte: before },
+    type,
+    value,
+    unit,
+  } as const;
+  const data = await db.healthkit_record.findMany({ where, take: 100 });
+  return res.json(data);
+});
 
 app.post("/", async (req, res) => {
   if (!req.body) return res.status(400).json({ success: false });

@@ -24,7 +24,7 @@
     "countries-list": "^2.6.1",
     "dayjs": "^1.11.5",
     "express": "^4.18.1",
-    "got": "^12.4.1",
+    "got": "^12.5.3",
     "node-html-parser": "^6.0.0",
     "tiny-async-pool": "^2.1.0",
     "zod": "^3.19.1"
